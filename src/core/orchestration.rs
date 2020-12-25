@@ -11,7 +11,7 @@ pub struct CommandHandler {
 
 pub struct Orchestrator {
     logger: Logger,
-    handler: JoinHandle<()>
+    handler: JoinHandle<()>,
 }
 
 impl CommandHandler {
@@ -20,25 +20,26 @@ impl CommandHandler {
             sender
         }
     }
-    
+
     pub fn send(&self, commands: CommandCollection) {
         self.sender.send(commands);
     }
-   
 }
 
 impl Orchestrator {
-    pub fn create(receiver: mpsc::Receiver<CommandCollection>, logger: Logger) -> Result<Orchestrator,&'static str> {
+    pub fn create(receiver: mpsc::Receiver<CommandCollection>, logger: Logger) -> Result<Orchestrator, &'static str> {
         logger.log(LogItem::info("orchestrator".to_string(), "Starting...".to_string()));
 
         let handler = thread::spawn(move || loop {
             let item = receiver.recv().unwrap();
             
-            });
+            for action in &item.to_actions() {
+                
+            }
         
-        
+        });
+
+
         Ok(Orchestrator { logger, handler })
-        
-        
     }
 }

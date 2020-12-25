@@ -40,3 +40,18 @@ pub struct JobResult {
     commands: Option<CommandCollection>,
     events: Option<Vec<Box<dyn Event>>>,
 }
+
+impl CommandCollection {
+    
+    pub fn to_actions(&self) -> Vec<Action> {
+        
+        let mut actions = Vec::new();
+        
+        for comm in &self.commands {
+            actions.push(comm.handle(self.task_id));
+        }
+        
+        
+        actions
+    }
+}
