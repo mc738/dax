@@ -31,14 +31,14 @@ impl Engine {
         // Start logger
         let log = Log::create(log_receive)?;
         
-        // Start orchestrator
-        let orchestrator = Orchestrator::create(com_receive,  logger.clone())?;
-        
         // Start event loop
         let event_loop = EventLoop::create(evt_receive, comm_handler.clone(), logger.clone())?;
         
         // Start workers
         let workers = WorkerPool::new(4, logger.clone(), evt_channel.clone(), comm_handler.clone())?;
+        
+        // Start orchestrator
+        let orchestrator = Orchestrator::create(com_receive,  logger.clone(), workers.get_sender())?;
         
         Ok(Engine {
             log,

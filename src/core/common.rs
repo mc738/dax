@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use crate::core::logging::LogItem;
 
 pub struct Task {
     id: Uuid
@@ -20,13 +21,13 @@ pub struct CommandCollection {
 pub trait Command {
     /// Handle the company to produce an executable action.
     /// The `orchestration` thread while use this to handle commands.
-    fn handle(&self, task_id: Uuid) -> Action;
+    fn create_actions(&self, task_id: Uuid) -> Vec<Action>;
 }
 
 pub enum Action {
-    Log,
+    Log(LogItem),
     DbWrite,
-    Job,
+    Job(Job),
     IO
 }
 
@@ -51,12 +52,20 @@ pub struct JobResult {
 
 impl CommandCollection {
     
+    
+    pub fn create(task_id: Uuid, commands: Vec<Box<dyn Command + Send>>) -> CommandCollection {
+        CommandCollection {
+            task_id,
+            commands
+        }
+    }
+    
     pub fn to_actions(&self) -> Vec<Action> {
         
         let mut actions = Vec::new();
         
         for comm in &self.commands {
-            actions.push(comm.handle(self.task_id));
+            actions.append(&mut comm.create_actions(self.task_id));
         }
         
         actions

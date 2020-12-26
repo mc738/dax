@@ -1,5 +1,5 @@
 use std::sync::mpsc;
-use crate::core::common::CommandCollection;
+use crate::core::common::{CommandCollection, Job, Action};
 use std::thread::JoinHandle;
 use crate::core::logging::{Logger, LogItem};
 use std::thread;
@@ -28,7 +28,7 @@ impl CommandHandler {
 
 impl Orchestrator {
     
-    pub fn create(receiver: mpsc::Receiver<CommandCollection>, logger: Logger) -> Result<Orchestrator, &'static str> {
+    pub fn create(receiver: mpsc::Receiver<CommandCollection>, logger: Logger, workers: mpsc::Sender<Job>) -> Result<Orchestrator, &'static str> {
         logger.log(LogItem::info("orchestrator".to_string(), "Starting...".to_string()));
 
         logger.log(LogItem::success("orchestrator".to_string(), "Started successfully".to_string()));
@@ -40,8 +40,13 @@ impl Orchestrator {
             
             logger.log(LogItem::info("orchestrator".to_string(), message));
             
-            for action in &commands.to_actions() {
-                // TODO handle actions
+            for action in commands.to_actions() {
+                match action {
+                    Action::Log(item) => logger.log(item),
+                    Action::DbWrite => {}
+                    Action::Job(job) => workers.send(job).unwrap(),
+                    Action::IO => {}
+                }
             }
 
             let message = format!("Commands handled successfully (task_id: {}, count: {})", commands.task_id, commands.count());

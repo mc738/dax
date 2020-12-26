@@ -61,6 +61,12 @@ impl WorkerPool {
         let job = Box::new(f);
         self.sender.send(job).unwrap();
     }
+    
+    
+    pub fn get_sender(&self) -> Sender<Job> {
+        self.sender.clone()
+    }
+    
 }
 
 
