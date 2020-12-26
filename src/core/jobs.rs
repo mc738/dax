@@ -2,6 +2,7 @@ use crate::core::common::{Job, JobResult};
 use uuid::Uuid;
 use std::process::Command;
 
+#[derive(Clone)]
 pub struct ProcSettings {
     command: String,
     args: Option<Vec<String>>,
@@ -28,12 +29,12 @@ impl ProcSettings {
     
     pub fn create_job(&self) -> Job {
         
-        let test = move || {
+        let settings = self.clone();
+        
+        let handler = move || {
 
-            let proc = ProcSettings::create("/home/max/Projects/Data".to_string(), None);
-            let result = proc.run();
+            let result = settings.run();
             println!("Result: {}", String::from_utf8(result.out).unwrap());
-            
             
             JobResult {
                 job_id: Default::default(),
@@ -43,7 +44,7 @@ impl ProcSettings {
             }
         };
 
-        let job: Job = Box::new(test);
+        let job: Job = Box::new(handler);
         
         job
     }
@@ -75,5 +76,4 @@ impl ProcSettings {
             }
         }
     }
-
 }

@@ -46,7 +46,7 @@ pub struct JobResult {
     pub(crate) job_id: Uuid,
     pub(crate) success: bool,
     pub(crate) commands: Option<CommandCollection>,
-    pub(crate) events: Option<Vec<Box<dyn Event>>>,
+    pub(crate) events: Option<Vec<Box<dyn Event + Send>>>,
 }
 
 impl CommandCollection {
@@ -58,7 +58,6 @@ impl CommandCollection {
         for comm in &self.commands {
             actions.push(comm.handle(self.task_id));
         }
-        
         
         actions
     }

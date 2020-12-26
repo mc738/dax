@@ -5,6 +5,7 @@ use crate::core::common::{Event, CommandCollection};
 use crate::core::orchestration::CommandHandler;
 use crate::core::logging::{Logger, LogItem};
 
+#[derive(Clone)]
 pub struct EventChannel {
     pub(crate) sender: mpsc::Sender<Box<dyn Event + Send>>
 }
@@ -43,5 +44,16 @@ impl EventChannel {
     /// Clones the internal sender.
     pub fn get(&self) -> mpsc::Sender<Box<dyn Event + Send>> {
         self.sender.clone()
+    }
+    
+    
+    pub fn create(sender: mpsc::Sender<Box<dyn Event + Send>>) -> EventChannel {
+        EventChannel {
+            sender
+        }
+    }
+    
+    pub fn send(&self, event: Box<dyn Event + Send>) {
+        self.sender.send(event);
     }
 } 

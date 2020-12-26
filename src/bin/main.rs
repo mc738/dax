@@ -7,15 +7,20 @@ use dax::core::jobs::{ProcSettings};
 
 fn main() {
     
-   let proc = ProcSettings::create("git".to_string(), None);
-    
+   let proc = ProcSettings::create("/home/max/Projects/Data".to_string(), None);
+
     let job = proc.create_job();
+    let job2 = proc.create_job();
     
     let result = job();
     
-    let engine = Engine::start().unwrap();
-
+    let result = job2();
     
+    let engine = Engine::create().unwrap();
+
+    loop {
+     
+    }
     
     // println!("Hello, world!");
 }
