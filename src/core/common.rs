@@ -4,6 +4,8 @@ pub struct Task {
     id: Uuid
 }
 
+//type Job = Box<dyn FnOnce() + Send + 'static>;
+
 pub trait Event {
     /// Handle the event to product a collection of objects implementing the `command` trait.
     /// If a `task_id` is provided, it will be used. If not a new `uuid` will be generated. 
@@ -11,7 +13,7 @@ pub trait Event {
 }
 
 pub struct CommandCollection {
-    task_id: Uuid,
+    pub task_id: Uuid,
     commands: Vec<Box<dyn Command + Send>>,
 }
 
@@ -28,17 +30,23 @@ pub enum Action {
     IO
 }
 
-pub trait Job {
+pub type Job = Box<dyn FnOnce() -> JobResult + Send + 'static>;
+
+pub trait Executable {
     /// Execute the job and return a `JobResult`.
     /// This can the be handled by the assigned `Worker`.
     fn execute(&self, task_id: Uuid) -> JobResult;
 }
 
+pub trait JobHandler {
+    fn create_job(&self) -> Job;
+}
+
 pub struct JobResult {
-    job_id: Uuid,
-    success: bool,
-    commands: Option<CommandCollection>,
-    events: Option<Vec<Box<dyn Event>>>,
+    pub(crate) job_id: Uuid,
+    pub(crate) success: bool,
+    pub(crate) commands: Option<CommandCollection>,
+    pub(crate) events: Option<Vec<Box<dyn Event>>>,
 }
 
 impl CommandCollection {
@@ -53,5 +61,9 @@ impl CommandCollection {
         
         
         actions
+    }
+    
+    pub fn count(&self) -> usize {
+        self.commands.len()
     }
 }

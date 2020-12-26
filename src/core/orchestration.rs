@@ -9,8 +9,8 @@ pub struct CommandHandler {
     pub(crate) sender: mpsc::Sender<CommandCollection>
 }
 
+
 pub struct Orchestrator {
-    logger: Logger,
     handler: JoinHandle<()>,
 }
 
@@ -27,19 +27,31 @@ impl CommandHandler {
 }
 
 impl Orchestrator {
+    
     pub fn create(receiver: mpsc::Receiver<CommandCollection>, logger: Logger) -> Result<Orchestrator, &'static str> {
         logger.log(LogItem::info("orchestrator".to_string(), "Starting...".to_string()));
 
+        logger.log(LogItem::success("orchestrator".to_string(), "Started successfully".to_string()));
+        
         let handler = thread::spawn(move || loop {
-            let item = receiver.recv().unwrap();
+            let commands = receiver.recv().unwrap();
             
-            for action in &item.to_actions() {
-                
+            let message = format!("Commands received (task_id: {}, count: {})", commands.task_id, commands.count());
+            
+            logger.log(LogItem::info("orchestrator".to_string(), message));
+            
+            for action in &commands.to_actions() {
+                // TODO handle actions
             }
+
+            let message = format!("Commands handled successfully (task_id: {}, count: {})", commands.task_id, commands.count());
+
+            logger.log(LogItem::success("orchestrator".to_string(), message));
         
         });
 
 
-        Ok(Orchestrator { logger, handler })
+
+        Ok(Orchestrator { handler })
     }
 }

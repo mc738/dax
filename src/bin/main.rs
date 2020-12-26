@@ -1,22 +1,21 @@
 use uuid::Uuid;
 use dax::core::logging::{Log, LogItem};
 use dax::core::common::{JobResult, Job};
-
-struct Proc {
-    
-}
-
-impl Job for Proc {
-    fn execute(&self, task_id: Uuid) -> JobResult {
-        println!("Executing process (task_id: {})", task_id);
-        unimplemented!()
-    }
-}
-
-
+use dax::app::Engine;
+use dax::core::jobs::{ProcSettings};
 
 
 fn main() {
+    
+   let proc = ProcSettings::create("git".to_string(), None);
+    
+    let job = proc.create_job();
+    
+    let result = job();
+    
+    let engine = Engine::start().unwrap();
+
+    
     
     // println!("Hello, world!");
 }
